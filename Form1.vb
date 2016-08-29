@@ -2,25 +2,27 @@
     Dim AppDir As String = System.AppDomain.CurrentDomain.BaseDirectory()
     Dim ModDir As String = "mods/"
 
-    Dim arrGames As Array = New String() {"war", _
-                                           "dm", _
-                                           "dom", _
-                                            "dem", _
-                                            "sab", _
-                                            "arena", _
-                                            "sd", _
-                                            "ctf", _
-                                            "oneflag", _
-                                            "gtnw", _
-                                            "koth", _
+    Dim gametypeShort As Array = New String() {"war",
+                                           "dm",
+                                           "dom",
+                                            "dem",
+                                            "sab",
+                                            "arena",
+                                            "sd",
+                                            "ctf",
+                                            "oneflag",
+                                            "gtnw",
+                                            "koth",
                                             "oitc"}
 
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
-        Log("ModHelper v" & Application.ProductVersion & " by Dragoon", True)
+        Log("ModHelper v" & Application.ProductVersion & " by LostSoulfly", True)
         txtModDir.Text = ModDir
         If LoadDir(AppDir & ModDir) = False Then
-            If LoadDir(AppDir & "mods/mp/") = True Then
+            If LoadDir(AppDir & "mods/") = True Then
+                ModDir = "mods/"
+            ElseIf LoadDir(AppDir & "mods/mp/") = True Then
                 ModDir = "mods/mp/"
             Else
                 MsgBox("Please put this in your MW2 folder and put all your mods in the 'mods' folder.")
@@ -121,35 +123,49 @@
     End Function
 
     Public Sub EnumMaps()
-        Dim arrMaps As Array = New String() {"mp_afghan", _
-                                                "mp_boneyard", _
-                                                "mp_brecourt", _
-                                                "mp_checkpoint", _
-                                                "mp_derail", _
-                                                "mp_estate", _
-                                                "mp_favela", _
-                                                "mp_highrise", _
-                                                "mp_nightshift", _
-                                                "mp_invasion", _
-                                                "mp_quarry", _
-                                                "mp_rundown", _
-                                                "mp_rust", _
-                                                "mp_subbase", _
-                                                "mp_terminal", _
-                                                "mp_underpass", _
-                                                "mp_complex", _
-                                                "mp_compact", _
-                                                "mp_crash", _
-                                                "mp_overgrown", _
-                                                "mp_storm", _
-                                                "mp_fuel2", _
-                                                "mp_abandon", _
-                                                "mp_strike", _
-                                                "mp_trailerpark", _
-                                                "mp_vacant"}
+        Dim arrMaps As Array = New String() {"mp_afghan",
+                                                "mp_boneyard",
+                                                "mp_brecourt",
+                                                "mp_checkpoint",
+                                                "mp_derail",
+                                                "mp_estate",
+                                                "mp_favela",
+                                                "mp_highrise",
+                                                "mp_nightshift",
+                                                "mp_invasion",
+                                                "mp_quarry",
+                                                "mp_rundown",
+                                                "mp_rust",
+                                                "mp_subbase",
+                                                "mp_terminal",
+                                                "mp_underpass",
+                                                "mp_complex",
+                                                "mp_compact",
+                                                "mp_crash",
+                                                "mp_overgrown",
+                                                "mp_storm",
+                                                "mp_fuel2",
+                                                "mp_abandon",
+                                                "mp_strike",
+                                                "mp_trailerpark",
+                                                "mp_vacant",
+                                                "mp_cross_fire",
+                                                "mp_crash_tropical",
+                                                "mp_killhouse",
+                                                "mp_cargoship",
+                                                "mp_storm_spring",
+                                                "mp_estate_tropical",
+                                                "mp_bloc",
+                                                "mp_fav_tropical",
+                                                "mp_nuked",
+                                                "mp_bog_sh",
+                                                "gulag",
+                                                "oilrig",
+                                                "invasion",
+                                                "mp_compact"}
 
-        For Each strArr In arrMaps
-            cbMaps.Items.Add(strArr)
+        For Each map In arrMaps
+            cbMaps.Items.Add(map)
         Next
         cbMaps.SelectedIndex = 0
     End Sub
@@ -169,29 +185,24 @@
                                     "Headquarters", _
                                     "One In The Chamber"}
 
-        For Each strArr In arr
-            cbGame.Items.Add(strArr)
+        For Each gametype In arr
+            cbGame.Items.Add(gametype)
         Next
         cbGame.SelectedIndex = 0
     End Sub
 
-    Public Sub SendCmd(ByVal strCMD As String)
+    Public Sub SendCmd(ByVal command As String)
         If ConnectionManager.CheckProcess = True Then
-            Application.DoEvents()
-            ConnectionManager.Handle(strCMD, True)
-            Application.DoEvents()
+            ConnectionManager.Handle(command, True)
         Else
-            Application.DoEvents()
-            ConnectionManager.Handle(strCMD, False)
-            Application.DoEvents()
+            ConnectionManager.Handle(command, False)
         End If
     End Sub
 
     Private Sub SetResult()
-        Dim strResult As String
+        Dim strResult As String = ""
         If chkMod.Checked = True Then strResult = "fs_game " & ModDir & lstDir.Text & ";"
-
-        If chkType.Checked = True Then strResult += "g_gametype " & arrGames(cbGame.SelectedIndex) & ";"
+        If chkType.Checked = True Then strResult += "g_gametype " & gametypeShort(cbGame.SelectedIndex) & ";"
         If chkDiehard.Checked = True Then strResult += "scr_diehard " & """" & "1" & """" & ";"
         If chkMap.Checked = True Then If chkLobby.Checked = True Then strResult += "ui_mapname " & cbMaps.Text & ";" Else strResult += "map " & cbMaps.Text & ";"
         If chkVidRestart.Checked = True Then strResult += "vid_restart;"
@@ -234,8 +245,8 @@
     End Sub
 
     Private Sub btnGame_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnGame.Click
-        Log("Changing game type to " & arrGames(cbGame.SelectedIndex))
-        SendCmd("g_gametype " & arrGames(cbGame.SelectedIndex))
+        Log("Changing game type to " & gametypeShort(cbGame.SelectedIndex))
+        SendCmd("g_gametype " & gametypeShort(cbGame.SelectedIndex))
     End Sub
 
     Private Sub chkMap_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles chkMap.CheckedChanged
@@ -278,16 +289,15 @@
     End Sub
 
     Private Sub btnTime_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTime.Click
-        SendCmd("scr_" & arrGames(cbGame.SelectedIndex) & "_timelimit " & numTime.Value)
+        SendCmd("scr_" & gametypeShort(cbGame.SelectedIndex) & "_timelimit " & numTime.Value)
     End Sub
 
     Private Sub btnScore_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnScore.Click
-        SendCmd("scr_" & arrGames(cbGame.SelectedIndex) & "_scorelimit " & numScore.Value)
+        SendCmd("scr_" & gametypeShort(cbGame.SelectedIndex) & "_scorelimit " & numScore.Value)
     End Sub
 
     Private Sub cbMaps_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cbMaps.SelectedIndexChanged
         SetResult()
-
     End Sub
 
     Private Sub cbGame_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cbGame.SelectedIndexChanged
@@ -327,4 +337,5 @@
         Timer.Interval = numTimer.Value * 1000
         chkTimer.Text = "Every " & numTimer.Value & " secs"
     End Sub
+
 End Class

@@ -22,44 +22,44 @@ Partial Class Form1
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.components = New System.ComponentModel.Container
+        Me.components = New System.ComponentModel.Container()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
-        Me.txtLog = New System.Windows.Forms.TextBox
-        Me.lstDir = New System.Windows.Forms.ListBox
-        Me.txtModDir = New System.Windows.Forms.TextBox
-        Me.btnBrowse = New System.Windows.Forms.Button
-        Me.txtResult = New System.Windows.Forms.TextBox
-        Me.lbl1 = New System.Windows.Forms.Label
-        Me.btnLaunch = New System.Windows.Forms.Button
-        Me.cbMaps = New System.Windows.Forms.ComboBox
-        Me.btnMap = New System.Windows.Forms.Button
-        Me.chkMap = New System.Windows.Forms.CheckBox
-        Me.cbGame = New System.Windows.Forms.ComboBox
-        Me.btnRestart = New System.Windows.Forms.Button
-        Me.btnGame = New System.Windows.Forms.Button
-        Me.chkType = New System.Windows.Forms.CheckBox
-        Me.chkLobby = New System.Windows.Forms.CheckBox
-        Me.btnHost = New System.Windows.Forms.Button
-        Me.numMax = New System.Windows.Forms.NumericUpDown
-        Me.numMin = New System.Windows.Forms.NumericUpDown
-        Me.btnPlayers = New System.Windows.Forms.Button
-        Me.chkDiehard = New System.Windows.Forms.CheckBox
-        Me.numXP = New System.Windows.Forms.NumericUpDown
-        Me.btnXP = New System.Windows.Forms.Button
-        Me.chkMod = New System.Windows.Forms.CheckBox
-        Me.btnTime = New System.Windows.Forms.Button
-        Me.numScore = New System.Windows.Forms.NumericUpDown
-        Me.numTime = New System.Windows.Forms.NumericUpDown
-        Me.btnScore = New System.Windows.Forms.Button
-        Me.chkVidRestart = New System.Windows.Forms.RadioButton
-        Me.chkMapRestart = New System.Windows.Forms.RadioButton
-        Me.txtCustom = New System.Windows.Forms.TextBox
-        Me.btnCustom = New System.Windows.Forms.Button
+        Me.txtLog = New System.Windows.Forms.TextBox()
+        Me.lstDir = New System.Windows.Forms.ListBox()
+        Me.txtModDir = New System.Windows.Forms.TextBox()
+        Me.btnBrowse = New System.Windows.Forms.Button()
+        Me.txtResult = New System.Windows.Forms.TextBox()
+        Me.lbl1 = New System.Windows.Forms.Label()
+        Me.btnLaunch = New System.Windows.Forms.Button()
+        Me.cbMaps = New System.Windows.Forms.ComboBox()
+        Me.btnMap = New System.Windows.Forms.Button()
+        Me.chkMap = New System.Windows.Forms.CheckBox()
+        Me.cbGame = New System.Windows.Forms.ComboBox()
+        Me.btnRestart = New System.Windows.Forms.Button()
+        Me.btnGame = New System.Windows.Forms.Button()
+        Me.chkType = New System.Windows.Forms.CheckBox()
+        Me.chkLobby = New System.Windows.Forms.CheckBox()
+        Me.btnHost = New System.Windows.Forms.Button()
+        Me.numMax = New System.Windows.Forms.NumericUpDown()
+        Me.numMin = New System.Windows.Forms.NumericUpDown()
+        Me.btnPlayers = New System.Windows.Forms.Button()
+        Me.chkDiehard = New System.Windows.Forms.CheckBox()
+        Me.numXP = New System.Windows.Forms.NumericUpDown()
+        Me.btnXP = New System.Windows.Forms.Button()
+        Me.chkMod = New System.Windows.Forms.CheckBox()
+        Me.btnTime = New System.Windows.Forms.Button()
+        Me.numScore = New System.Windows.Forms.NumericUpDown()
+        Me.numTime = New System.Windows.Forms.NumericUpDown()
+        Me.btnScore = New System.Windows.Forms.Button()
+        Me.chkVidRestart = New System.Windows.Forms.RadioButton()
+        Me.chkMapRestart = New System.Windows.Forms.RadioButton()
+        Me.txtCustom = New System.Windows.Forms.TextBox()
+        Me.btnCustom = New System.Windows.Forms.Button()
         Me.Timer = New System.Windows.Forms.Timer(Me.components)
-        Me.chkTimer = New System.Windows.Forms.CheckBox
-        Me.chkStart = New System.Windows.Forms.CheckBox
-        Me.btnFoV = New System.Windows.Forms.Button
-        Me.numTimer = New System.Windows.Forms.NumericUpDown
+        Me.chkTimer = New System.Windows.Forms.CheckBox()
+        Me.chkStart = New System.Windows.Forms.CheckBox()
+        Me.btnFoV = New System.Windows.Forms.Button()
+        Me.numTimer = New System.Windows.Forms.NumericUpDown()
         CType(Me.numMax, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.numMin, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.numXP, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -348,8 +348,8 @@ Partial Class Form1
         Me.txtCustom.Name = "txtCustom"
         Me.txtCustom.Size = New System.Drawing.Size(181, 20)
         Me.txtCustom.TabIndex = 31
-        Me.txtCustom.Text = "say ""^4Excessive use of 'noob weapons' (GL, Shotgun, G18) will result in a kick. " & _
-            "As per rules of viewtopic.php?f=31&t=2210"""
+        Me.txtCustom.Text = "say ""^4Excessive use of 'noob weapons' (GL, Shotgun, G18) will result in a kick.""" &
+    ""
         '
         'btnCustom
         '

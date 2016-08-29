@@ -7,185 +7,185 @@ Imports System.Text
 Imports System.Threading
 Imports System.IO.File
 
-    Public Class ConnectionManager
-        ' Methods
-        Private Shared Function GetEditText(ByVal hwnd As IntPtr) As String
-            Dim capacity As Integer = ConnectionManager.SendMessage(hwnd, 14, 0, DirectCast(Nothing, StringBuilder))
-            Dim lParam As New StringBuilder(capacity)
-            ConnectionManager.SendMessage(hwnd, 13, CInt((capacity + 1)), lParam)
-            Return lParam.ToString
-        End Function
+Public Class ConnectionManager
+    ' Methods
+    Private Shared Function GetEditText(ByVal hwnd As IntPtr) As String
+        Dim capacity As Integer = ConnectionManager.SendMessage(hwnd, 14, 0, DirectCast(Nothing, StringBuilder))
+        Dim lParam As New StringBuilder(capacity)
+        ConnectionManager.SendMessage(hwnd, 13, CInt((capacity + 1)), lParam)
+        Return lParam.ToString
+    End Function
 
-        Private Shared Function GetLogContent() As String
-            Return ConnectionManager.GetEditText(ConnectionManager._hwndLog)
-        End Function
+    Private Shared Function GetLogContent() As String
+        Return ConnectionManager.GetEditText(ConnectionManager._hwndLog)
+    End Function
+
     Public Shared Function CheckProcess() As Boolean
-        If (Process.GetProcessesByName("iw4mp_server").Length > 1) Then
+        If (Process.GetProcessesByName("iw4m").Length > 0) Then
             Return True
-        ElseIf (Process.GetProcessesByName("iw4mp_server.exe").Length > 0) Then
+        ElseIf (Process.GetProcessesByName("iw4m.exe").Length > 0) Then
             Return True
         End If
 
         Return False
     End Function
 
-    Public Shared Function StartMW2(Optional ByVal strFile As String = "iw4mp_server.exe") As Boolean
+    Public Shared Function StartMW2(Optional ByVal strFile As String = "iw4m.exe") As Boolean
+        If Not Form1.chkStart.Checked Then Exit Function
         If CheckProcess() = False Then
             'Console.WriteLine("Dir:" & Environment.CurrentDirectory())
             If Exists(Environment.CurrentDirectory() & "/" & strFile) Then
-                If Form1.chkStart.Checked = False Then
-                    Form1.Log("MW2 not found running!")
-                Else
-                    Form1.Log("MW2 not found, starting it..")
-                    Application.DoEvents()
-                    Try
-                        Dim nProcess As New Process
-                        With nProcess
-                            .StartInfo.UseShellExecute = False
-                            .StartInfo.FileName = strFile
-                            .Start()
-                        End With
-                    Catch e As Exception
-                        Form1.Log((e.Message))
-                        Return False
-                    End Try
-                    Return True
-                End If
-            Else
-                Form1.Log("MW2 was not found or could not be started.")
+                Form1.Log("
+not running, attempting to start it..")
+                Try
+                    Dim nProcess As New Process
+                    With nProcess
+                        .StartInfo.UseShellExecute = False
+                        .StartInfo.FileName = strFile
+                        .Start()
+                    End With
+                Catch e As Exception
+                    Form1.Log((e.Message))
+                    Return False
+                End Try
+                Return True
             End If
-            'If Shell("iw4mp_server.exe", AppWinStyle.NormalFocus, False) > 0 Then StartMW2 = True
+            'If Shell("iw4m.exe", AppWinStyle.NormalFocus, False) > 0 Then StartMW2 = True
         Else
-            'Console.WriteLine("iw4mp_server.exe does not exist.")
+            'Console.WriteLine("iw4m.exe does not exist.")
             Return True
         End If
 
         Return False
     End Function
 
-    Public Shared Sub Handle(ByVal strString As String, ByVal isInitial As Boolean)
+    Public Shared Sub Handle(ByVal args As String, ByVal isInitial As Boolean)
         If StartMW2() = False Then
-            'Console.WriteLine()
-            'Form1.Log("MW2 was not found or could not be started.")
-            'End
+            If Form1.chkStart.Checked Then Form1.Log("IW4 was not found or could not be started.")
         Else
-            Application.DoEvents()
-            ConnectionManager.PerformConnect(strString, isInitial)
+            ConnectionManager.PerformConnect(args, isInitial)
         End If
     End Sub
 
     Private Shared Function OpenIW4Process() As IntPtr
-        Dim processesByName As Process() = Process.GetProcessesByName("iw4mp_server.exe")
-        Dim processArray2 As Process() = processesByName
-        Dim index As Integer = 0
-        Application.DoEvents()
-        'Form1.Log("Waiting for MW2 to be ready..")
-        Do While (index < processArray2.Length)
-            Application.DoEvents()
-            Dim process As Process = processArray2(index)
-            Return process.Handle
-        Loop
-        Return IntPtr.Zero
+        Dim procHwnd As Integer
+
+        Console.Write("Waiting for IW4's process..")
+        For i = 1 To 120
+            procHwnd = FindWindow("IW4 WinConsole", vbNullString)
+            If (procHwnd <> IntPtr.Zero) Then
+                Return procHwnd
+            End If
+            Thread.Sleep(100)
+            If IsEven(i) Then Console.Write(".")
+        Next
     End Function
 
-    Private Shared Sub PerformConnect(ByVal strString As String, ByVal isInitial As Boolean)
+    Private Shared Sub PerformConnect(ByVal command As String, ByVal isInitial As Boolean)
         Dim ptr As IntPtr = ConnectionManager.OpenIW4Process
-        If (ptr <> IntPtr.Zero) Then
 
+        If (ptr <> IntPtr.Zero) Then
+            'Form1.Log("Waiting for IW4 to be ready..")
             ConnectionManager._process = ptr
+
             If ConnectionManager.WaitForConsole() = False Then Form1.Log("Timed out, please try again.")
 
             If Not isInitial Then
-                If ConnectionManager.WaitForLog("LSPXUID") = False Then Form1.Log("Timed out, please try again.")
+                If ConnectionManager.WaitForLog("Successfully read stats data from IWNet") = False Then
+                    Form1.Log("Unable to determine if console is ready.")
+                End If
             End If
-            ConnectionManager.SendToInput((strString))
-            Form1.Log("Commands sent successfully!")
+            ConnectionManager.SendToInput(command)
         Else
-            Form1.Log("Error locating MW2's process!")
-            End
+            Form1.Log("Error locating IW4's process!")
         End If
     End Sub
 
-    Private Shared Sub ReadInputHwnd()
-        ConnectionManager._hwndInput = ConnectionManager.ReadIntPtr(ConnectionManager._hwndConsoleInpEditLoc)
-    End Sub
-
-    Private Shared Function ReadInt32(ByVal location As Integer) As Integer
-        Dim num As Integer
-        Dim lpBuffer As Byte() = New Byte(4 - 1) {}
-        ConnectionManager.ReadProcessMemory(ConnectionManager._process, New IntPtr(location), lpBuffer, 4, num)
-        Return BitConverter.ToInt32(lpBuffer, 0)
-    End Function
-
-    Private Shared Function ReadIntPtr(ByVal location As Integer) As IntPtr
-        Return New IntPtr(ConnectionManager.ReadInt32(location))
-    End Function
-
-    Private Shared Sub ReadLogHwnd()
-        ConnectionManager._hwndLog = ConnectionManager.ReadIntPtr(ConnectionManager._hwndConsoleLogEditLoc)
-    End Sub
-
-    <DllImport("kernel32.dll", SetLastError:=True)> _
+    <DllImport("kernel32.dll", SetLastError:=True)>
     Private Shared Function ReadProcessMemory(ByVal hProcess As IntPtr, ByVal lpBaseAddress As IntPtr, <Out()> ByVal lpBuffer As Byte(), ByVal dwSize As Integer, <Out()> ByRef lpNumberOfBytesRead As Integer) As Boolean
     End Function
 
-    <DllImport("user32.dll")> _
+    <DllImport("user32.dll")>
+    Private Shared Function FindWindowExA(ByVal hWnd1 As Integer, ByVal hWnd2 As Integer, ByVal lpsz1 As String, ByVal lpsz2 As String) As Integer
+    End Function
+
+    <DllImport("user32.dll")>
+    Private Shared Function FindWindow(ByVal lpClassName As String, ByVal lpWindowName As String) As Integer
+    End Function
+
+    <DllImport("user32.dll")>
+    Private Shared Function GetWindow(ByVal hWnd As IntPtr, ByVal uCmd As Integer) As IntPtr
+    End Function
+
+    '<DllImport("user32.dll")>
+    'Private Shared Function SendMessageA(ByVal hWnd As IntPtr, ByVal wMsg As Int32, ByVal wParam As Int32, ByVal lParam As String) As Int32
+    'End Function
+
+    <DllImport("user32.dll")>
     Private Shared Function SendMessage(ByVal hWnd As IntPtr, ByVal Msg As UInt32, ByVal wParam As Integer, ByVal lParam As Integer) As IntPtr
     End Function
 
-    <DllImport("user32.dll", CharSet:=CharSet.Auto)> _
+    <DllImport("user32.dll", CharSet:=CharSet.Auto)>
     Private Shared Function SendMessage(ByVal hWnd As IntPtr, ByVal Msg As UInt32, ByVal wParam As Integer, ByVal lParam As StringBuilder) As Integer
     End Function
 
-    <DllImport("user32.dll")> _
+    <DllImport("user32.dll")>
     Private Shared Function SendMessage(ByVal hWnd As IntPtr, ByVal Msg As UInt32, ByVal wParam As IntPtr, <MarshalAs(UnmanagedType.LPStr)> ByVal lParam As String) As IntPtr
     End Function
 
-    <DllImport("user32.dll", CharSet:=CharSet.Auto)> _
+    <DllImport("user32.dll", CharSet:=CharSet.Auto)>
     Private Shared Function SendMessage(ByVal hWnd As IntPtr, ByVal Msg As UInt32, ByVal wParam As IntPtr, ByVal lParam As StringBuilder) As IntPtr
     End Function
 
-    <DllImport("user32.dll", CharSet:=CharSet.Auto)> _
+    <DllImport("user32.dll", CharSet:=CharSet.Auto)>
     Private Shared Function SendMessage(ByVal hWnd As HandleRef, ByVal Msg As UInt32, ByVal wParam As IntPtr, ByVal lParam As IntPtr) As IntPtr
     End Function
 
-    <DllImport("user32.dll")> _
-    Private Shared Function SendMessageW(ByVal hWnd As IntPtr, ByVal Msg As UInt32, ByVal wParam As IntPtr, <MarshalAs(UnmanagedType.LPWStr)> ByVal lParam As String) As IntPtr
-    End Function
+    '<DllImport("user32.dll")> _
+    'Private Shared Function SendMessageW(ByVal hWnd As IntPtr, ByVal Msg As UInt32, ByVal wParam As IntPtr, <MarshalAs(UnmanagedType.LPWStr)> ByVal lParam As String) As IntPtr
+    'End Function
 
     Private Shared Sub SendToInput(ByVal [text] As String)
         ConnectionManager.SendMessage(ConnectionManager._hwndInput, 12, IntPtr.Zero, [text])
         ConnectionManager.SendMessage(ConnectionManager._hwndInput, &H102, 13, 0)
+
+        'Dim textToSend As New StringBuilder([text])
+        'iConsoleHwnd = FindWindow("IW4 WinConsole", vbNullString)
+        'iCmdHwnd = FindWindowExA(iConsoleHwnd, 0, "edit", vbNullString)
+        'iLogHwnd = GetWindow(iCmdHwnd, 2)
+        'ConnectionManager.SendMessage(_hwndInput, WM_SETTEXT, IntPtr.Zero, textToSend)
+
     End Sub
 
     Private Shared Function WaitForConsole() As Boolean
-        'Form1.Log("Waiting for console")
-        For i = 1 To 60
-            ConnectionManager.ReadInputHwnd()
-            ConnectionManager.ReadLogHwnd()
+        Console.Write("Waiting for console")
+        For i = 1 To 120
+
+            ConnectionManager._hwndInput = FindWindowExA(_process, 0, "edit", vbNullString)
+            ConnectionManager._hwndLog = GetWindow(ConnectionManager._hwndInput, 2)
+
             If ((ConnectionManager._hwndInput <> IntPtr.Zero) AndAlso (ConnectionManager._hwndLog <> IntPtr.Zero)) Then
                 Return True
             End If
-            Application.DoEvents()
             Thread.Sleep(500)
-            If IsEven(i) Then Form1.Log(".", True)
+            If IsEven(i) Then Console.Write(".")
         Next
         Form1.Log("Timed out, please try again")
+        Console.ReadKey()
         Return False
     End Function
 
     Private Shared Function WaitForLog(ByVal contains As String) As Boolean
-        'Form1.Log("Waiting for log")
-        For i = 1 To 60
-            Application.DoEvents()
-            If IsEven(i) Then Form1.Log(".", True)
+        Console.Write("Waiting for log")
+        For i = 1 To 120
+            If IsEven(i) Then Console.Write(".")
             If ConnectionManager.GetLogContent.Contains(contains) Then
                 Return True
             End If
-
             Thread.Sleep(500)
         Next
         Form1.Log("Timed out, please try again")
+        Console.ReadKey()
         Return False
     End Function
 
@@ -194,8 +194,6 @@ Imports System.IO.File
     End Function
 
     ' Fields
-    Private Shared ReadOnly _hwndConsoleInpEditLoc As Integer = &H64FEEA8
-    Private Shared ReadOnly _hwndConsoleLogEditLoc As Integer = &H64FEE9C
     Private Shared _hwndInput As IntPtr
     Private Shared _hwndLog As IntPtr
     Private Shared _process As IntPtr
