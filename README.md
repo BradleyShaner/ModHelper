@@ -5,6 +5,7 @@ Extremely simplistic program that passes commands to the console window of IW4 (
 
 Based off of the code from my IW4Connecter, this was written nearly 6 years ago. I dug it up, brushed it off, and got it working again.
 
+![Screenshot](Screens/1.PNG)
 
 How to use:
 
